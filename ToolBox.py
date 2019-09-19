@@ -238,6 +238,36 @@ def grid_search_dict_to_df(Paras_dict):
     Para_table = pd.DataFrame(grid_search_para_comb(Paras_dict,Para_names),columns = Para_names)
     return Para_table
 
+def expand_col_to_bool_dataset(input_df,sele_cols):
+    '''
+    for some data sets, targets are given as str, str, in some columns
+    this is to expand this kind of dataset into sparsed boolean dataframe (exsit or not)
+    paras: input dataframe, with index=instances, selected columns to expand.
+    returns: a dataframe, with these two cols expanded. 
+    features are not having sequnces, all sele_cols are just mixed together. 
+    '''
+    if not isinstance(input_df,pd.DataFrame):
+        input_df = pd.DataFrame(input_df)
+
+    if isinstance(sele_cols,str):
+        sele_cols = [].append(sele_cols)
+
+    all_columns = set()
+    for each in input_df[sele_cols].values.flatten():
+        readed = [x.strip() for x in each.strip().split(',')]
+        all_columns = all_columns|set(readed)
+    all_columns = list(all_columns)
+    all_columns.sort()
+
+    table = pd.DataFrame(np.zeros((input_df.shape[0],len(all_columns)),dtype = bool),
+                         index = input_df.index,columns=all_columns)
+    for idx,each_row in input_df[sele_cols].iterrows():
+        for each in each_row:
+            readed = [x.strip() for x in each.strip().split(',')]
+            for each_ft in readed:
+                table.loc[idx,each_ft] = True
+    return table
+
 #%% I/O
 import datetime
 def write_to_log(*arg):
