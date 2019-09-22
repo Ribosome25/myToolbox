@@ -125,7 +125,19 @@ def normalize_int_between(data,low = 0,high = 255):
     
     return int_data
 
-    
+def nearestPSD(A,epsilon=0):
+    """
+    https://stackoverflow.com/questions/10939213/how-can-i-calculate-the-nearest-positive-semi-definite-matrix
+    """
+    n = A.shape[0]
+    eigval, eigvec = np.linalg.eig(A)
+    val = np.matrix(np.maximum(eigval,epsilon))
+    vec = np.matrix(eigvec)
+    T = 1/(np.multiply(vec,vec) * val.T)
+    T = np.matrix(np.sqrt(np.diag(np.array(T).reshape((n)) )))
+    B = T * vec * np.diag(np.array(np.sqrt(val)).reshape((n)))
+    out = B*B.T
+    return(out)
 #%%  Preprocessing
 def Impute(X,k = 5,metric = 'correlation',axis = 0,weighted = False):
     '''
