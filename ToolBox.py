@@ -282,6 +282,7 @@ def expand_col_to_bool_dataset(input_df,sele_cols):
 
 #%% I/O
 import datetime
+import os
 def write_to_log(*arg):
     Str = ''
     for each in arg:
@@ -295,3 +296,11 @@ def write_to_log(*arg):
             file.write(theTime+'\t'+Str+'\n')
     except:
         raise Warning ("Failed to save log. ")
+
+def mkdir(dir_name):
+    try:
+        os.mkdir(dir_name)
+    except:
+        raise Warning (dir_name+" already exsits.")
+    finally:
+        os.chdir(dir_name)
