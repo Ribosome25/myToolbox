@@ -1,3 +1,8 @@
+
+
+import pandas as pd
+import numpy as np
+
 def top_percentage_distribution(data, percentage, pick_highest = True, return_values = False):
     '''
     Given a dataset, find the top % of this distribution.
