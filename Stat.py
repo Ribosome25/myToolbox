@@ -48,6 +48,29 @@ def normalize_int_between(data,low = 0,high = 255):
     
     return int_data
 
+def symmetrize_matrix(K, mode='average'):
+    """
+    3 modes.
+    or 取最大？ and 取最小？#TODO
+    """
+    if mode == 'average':
+        return 0.5*(K + K.transpose())
+    elif mode == 'or':
+        Ktrans = K.transpose()
+        dK = abs(K - Ktrans)
+        K = K + Ktrans
+        K = K + dK
+        return 0.5*K
+    elif mode == 'and':
+        Ktrans = K.transpose()
+        dK = abs(K - Ktrans)
+        K = K + Ktrans
+        K = K - dK
+        return 0.5*K
+    else:
+        raise ValueError('Did not understand symmetrization method')
+        
+
 def nearestPSD(A,epsilon=0):
     """
     https://stackoverflow.com/questions/10939213/how-can-i-calculate-the-nearest-positive-semi-definite-matrix

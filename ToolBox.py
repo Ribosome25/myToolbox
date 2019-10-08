@@ -73,11 +73,8 @@ class Str:
         
         elif isinstance(data,list):
             print('To do')
-        
-        
 
 
-                
 #%% Stats, Math
 
 def top_percentage_distribution(data, percentage, pick_highest = True, return_values = False):
@@ -138,6 +135,29 @@ def nearestPSD(A,epsilon=0):
     B = T * vec * np.diag(np.array(np.sqrt(val)).reshape((n)))
     out = B*B.T
     return(out)
+
+def symmetrize_matrix(K, mode='average'):
+    """
+    3 modes.
+    or 取最大？ and 取最小？#TODO
+    """
+    if mode == 'average':
+        return 0.5*(K + K.transpose())
+    elif mode == 'or':
+        Ktrans = K.transpose()
+        dK = abs(K - Ktrans)
+        K = K + Ktrans
+        K = K + dK
+        return 0.5*K
+    elif mode == 'and':
+        Ktrans = K.transpose()
+        dK = abs(K - Ktrans)
+        K = K + Ktrans
+        K = K - dK
+        return 0.5*K
+    else:
+        raise ValueError('Did not understand symmetrization method')
+        
 #%%  Preprocessing
 def Impute(X,k = 5,metric = 'correlation',axis = 0,weighted = False):
     '''
@@ -153,7 +173,6 @@ def Impute(X,k = 5,metric = 'correlation',axis = 0,weighted = False):
     @ Returns:
         DF or array after imputation.
     '''
-
     # If imputate col-wise: transpose it here, and transpose back in the end
     if axis == 1:
         X = X.T
@@ -194,7 +213,6 @@ def Impute(X,k = 5,metric = 'correlation',axis = 0,weighted = False):
                     X[row_id,each_idx] = np.take(global_mean,each_idx)
                 else:
                     X[row_id,each_idx] = np.take(knn_col_mean,each_idx)
-            
         else:
             continue
 
@@ -229,8 +247,8 @@ def grid_search_para_comb(Paras,Para_names):
     Paras = {'kern': ['lin','rbf'], 'sigma':np.logspace(-1,1,10), 'B': np.linspace(1,5,5), 'lmbd' : [0,1]}
     Para_names = list(Paras.keys())
     Para_table = pd.DataFrame(GridSearchTL.get_comb(Paras,Para_names),columns = Para_names)
-    
     """
+    
     if len(Para_names) == 1:
         return np.vstack(Paras[Para_names[0]])
     
