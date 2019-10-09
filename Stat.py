@@ -71,10 +71,12 @@ def symmetrize_matrix(K, mode='average'):
         raise ValueError('Did not understand symmetrization method')
         
 
-def nearestPSD(A,epsilon=0):
+def nearestPSD(A,return_real=True,epsilon=0):
     """
     https://stackoverflow.com/questions/10939213/how-can-i-calculate-the-nearest-positive-semi-definite-matrix
+    Returns a symmetric PSD
     """
+    assert(A.shape[0] == A.shape[1]),("nearest-positive-semi-definite-matrix: This is not a symmetric matrix."
     n = A.shape[0]
     eigval, eigvec = np.linalg.eig(A)
     val = np.matrix(np.maximum(eigval,epsilon))
@@ -83,4 +85,6 @@ def nearestPSD(A,epsilon=0):
     T = np.matrix(np.sqrt(np.diag(np.array(T).reshape((n)) )))
     B = T * vec * np.diag(np.array(np.sqrt(val)).reshape((n)))
     out = B*B.T
+    if return_real:
+        out = np.real(out)
     return(out)
