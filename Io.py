@@ -18,6 +18,6 @@ def mkdir(dir_name):
     try:
         os.mkdir(dir_name)
     except:
-        raise Warning (dir_name+" already exsits.")
+        print (dir_name+" already exsits.")
     finally:
         os.chdir(dir_name)

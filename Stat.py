@@ -1,3 +1,8 @@
+
+
+import pandas as pd
+import numpy as np
+
 def top_percentage_distribution(data, percentage, pick_highest = True, return_values = False):
     '''
     Given a dataset, find the top % of this distribution.
@@ -43,10 +48,35 @@ def normalize_int_between(data,low = 0,high = 255):
     
     return int_data
 
-def nearestPSD(A,epsilon=0):
+def symmetrize_matrix(K, mode='average'):
+    """
+    3 modes.
+    or 取最大？ and 取最小？#TODO
+    """
+    if mode == 'average':
+        return 0.5*(K + K.transpose())
+    elif mode == 'or':
+        Ktrans = K.transpose()
+        dK = abs(K - Ktrans)
+        K = K + Ktrans
+        K = K + dK
+        return 0.5*K
+    elif mode == 'and':
+        Ktrans = K.transpose()
+        dK = abs(K - Ktrans)
+        K = K + Ktrans
+        K = K - dK
+        return 0.5*K
+    else:
+        raise ValueError('Did not understand symmetrization method')
+        
+
+def nearestPSD(A,return_real=True,epsilon=0):
     """
     https://stackoverflow.com/questions/10939213/how-can-i-calculate-the-nearest-positive-semi-definite-matrix
+    Returns a symmetric PSD
     """
+    assert(A.shape[0] == A.shape[1]),("nearest-positive-semi-definite-matrix: This is not a symmetric matrix."
     n = A.shape[0]
     eigval, eigvec = np.linalg.eig(A)
     val = np.matrix(np.maximum(eigval,epsilon))
@@ -55,4 +85,6 @@ def nearestPSD(A,epsilon=0):
     T = np.matrix(np.sqrt(np.diag(np.array(T).reshape((n)) )))
     B = T * vec * np.diag(np.array(np.sqrt(val)).reshape((n)))
     out = B*B.T
+    if return_real:
+        out = np.real(out)
     return(out)
