@@ -127,7 +127,7 @@ def nearestPSD(A,return_real=True,epsilon=0):
     https://stackoverflow.com/questions/10939213/how-can-i-calculate-the-nearest-positive-semi-definite-matrix
     Returns a symmetric PSD
     """
-    assert(A.shape[0] == A.shape[1]),("nearest-positive-semi-definite-matrix: This is not a symmetric matrix."
+    assert(A.shape[0] == A.shape[1]),("nearest-positive-semi-definite-matrix: This is not a symmetric matrix.")
     n = A.shape[0]
     eigval, eigvec = np.linalg.eig(A)
     val = np.matrix(np.maximum(eigval,epsilon))
