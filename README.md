@@ -1,10 +1,9 @@
 # Toolbox
 Some tools wrote for convenience. 
 
-1. Some Metrics for machine learning: NRMSE, Accuracy, F1-score, k-fold cross validation.<br>
-2. K-nearest neighbor imputation (knnimpute). Impute missing values of numeric dataset. <br>
-3. Find the top x% values in a distribution. Given a data set and a percentage, this returns the threshold above witch is selected to be the top x% of this distribution. <br>  
-
-  etc....<br>
-    <br>
-    to be done ...:)
+ToolBox.py includes all methods. <br> This is left for from ** import ToolBox.<br>
+Metrics.py are the metrics.   
+The other are methods binned into different categories. <br>
+<br>
+## 
+    md to be done ... :)
