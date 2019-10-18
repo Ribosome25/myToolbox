@@ -72,6 +72,53 @@ def test_triplet(n_dim=3):
     assert(rst_dict['NRMSE'] == old_nrmse)
     return None
     
+def triplet_transfer(Y_Target, Y_Predict, Y_Source, multi_dimension = False, output_format = list):
+    """
+    Change da thang subtrac in var to the mean(Source Mean),
+    Because we don't know the mean of DomainTarget. 
+    Thus, if we predict all values as the mean of Sourse, NRMSE will be 1. 
+    """
+    Y_Target = np.asarray(Y_Target,order = 'C')
+    Y_Predict = np.asarray(Y_Predict,order = 'C')
+    if multi_dimension:
+        Y_Target = Y_Target.flatten()
+        Y_Predict = Y_Predict.flatten()
+    else:
+        Y_Target = Y_Target.reshape(len(Y_Target),1)
+        Y_Predict = Y_Predict.reshape(len(Y_Predict),1)
+        
+    if len(Y_Target)==len(Y_Predict):
+        mse = np.mean((Y_Predict - Y_Target)**2)
+        var = np.mean( (Y_Predict - np.mean(Y_Source.ravel()))**2 )
+        nrmse = np.sqrt( mse/var )
+        pcorrs, pvalue = pearsonr(Y_Predict,Y_Target)
+        if multi_dimension:
+            pcorr = pcorrs
+        else:
+            pcorr = pcorrs[0]
+    else:
+        raise ValueError ('Target & Predicted are not of same length.')
+        return np.nan
+    
+    if output_format==list:
+        return([nrmse, mse, pcorr])
+    elif output_format==dict:
+        return({'NRMSE':nrmse,
+                'MSE':mse,
+                'P-CorrCoef':pcorr
+                })
+    else:
+        print("Unknown format, to be done. return list.")
+        return([nrmse,mse,pcorr])
+
+def test_triplet_transfer(n_dim=3):
+    if n_dim==1:
+        print("TBD")
+        return True
+    
+    print("没想好")
+    return None
+#%%
 def Accuracy(Y_Target,Y_Predict,error_rate = False,multi_dimension = False):
     Y_Target = np.asarray(Y_Target,order = 'C')
     Y_Predict = np.asarray(Y_Predict,order = 'C')
