@@ -32,7 +32,7 @@ def grid_search_dict_to_df(Paras_dict):
     Para_table = pd.DataFrame(grid_search_para_comb(Paras_dict,Para_names),columns = Para_names)
     return Para_table
 
-def expand_col_to_bool_dataset(input_df,sele_cols):
+def expand_col_to_onehot(input_df,sele_cols):
     '''
     for some data sets, targets are given as str, str, in some columns
     this is to expand this kind of dataset into sparsed boolean dataframe (exsit or not)

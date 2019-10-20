@@ -90,7 +90,7 @@ def triplet_transfer(Y_Target, Y_Predict, Y_Source, multi_dimension = False, out
     if len(Y_Target)==len(Y_Predict):
         mse = np.mean((Y_Predict - Y_Target)**2)
         #TODO: confusion
-        var = np.mean( (Y_Predict - np.mean(Y_Source.ravel()))**2 )
+#        var = np.mean( (Y_Predict - np.mean(Y_Source.ravel()))**2 )
         var = np.mean( (Y_Target - np.mean(Y_Source.ravel()))**2 )
         nrmse = np.sqrt( mse/var )
         pcorrs, pvalue = pearsonr(Y_Predict,Y_Target)
