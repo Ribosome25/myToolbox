@@ -23,6 +23,10 @@ def NRMSE(Y_Target, Y_Predict, multi_dimension = False):
     return NRMSE_Val, MSE
 
 def triplet(Y_Target, Y_Predict, multi_dimension = False, output_format = list):
+    """
+    Accepts appended results in each iterations. 
+    Put multi_dimension = Ture
+    """
     Y_Target = np.asarray(Y_Target,order = 'C')
     Y_Predict = np.asarray(Y_Predict,order = 'C')
     if multi_dimension:
