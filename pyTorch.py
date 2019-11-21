@@ -17,7 +17,10 @@ def load_to_device(device, *arg):
     """ Transfer all items in arg to torch.device """
     rt = []
     for each_item in arg:
-        rt.append(torch.from_numpy(each_item).to(device, dtype=torch.float32))
+        if isinstance(each_item, np.ndarray):
+            rt.append(torch.from_numpy(each_item).to(device, dtype=torch.float32))
+        elif isinstance(each_item, torch.Tensor):
+            rt.append(each_item.to(device, dtype=torch.float32))
     return rt
     
 def norm_01_tensor(vector):

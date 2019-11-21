@@ -31,6 +31,24 @@ def write_csv(array,name = '_save.csv'):
     pd.DataFrame(array).to_csv(name)
     return True
     
+def add_to_csv(name = '_save.csv', obj):
+    from collections.abc import Iterable
+    if isinstance(obj, dict):
+        if not os.path.exists(name):
+            list_to_write = list(args)
+            with open(name,'a') as file:
+                file.write('\n')
+                file.writelines(["%s," % item  for item in list_to_write])
+        else:
+            list_to_write = list(args.values())
+            with open(name,'a') as file:
+                file.write('\n')
+                file.writelines(["%s," % item  for item in list_to_write])
+    elif isinstance(obj, Iterable):
+        with open(name,'a') as file:
+            file.write('\n')
+            file.writelines(["%s," % item  for item in obj])
+            
 """
 havent think of a way to write this
 if not os.path.exists("CNN_BF_grid.csv"):

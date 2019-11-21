@@ -14,6 +14,6 @@ from . import Metrics
 from . import Preprocessing
 from . import Stat
 from . import Str
-
+from . import pyTorch
 
 __all__ = ['Metrics', 'ToolBox']
