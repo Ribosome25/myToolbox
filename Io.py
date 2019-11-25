@@ -31,7 +31,7 @@ def write_csv(array,name = '_save.csv'):
     pd.DataFrame(array).to_csv(name)
     return True
     
-def add_to_csv(name = '_save.csv', obj):
+def add_to_csv(obj, name = '_save.csv'):
     from collections.abc import Iterable
     if isinstance(obj, dict):
         if not os.path.exists(name):

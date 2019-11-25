@@ -54,7 +54,7 @@ def norm_01(*arg, low_lim = 0, high_lim = 1):
     else:
         return rt
 
-def force_convert(*arg, to_tensor = True):
+def force_type_convert(*arg, to_tensor = True):
     rt = []
     if to_tensor:
         for each_item in arg:
