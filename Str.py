@@ -1,3 +1,6 @@
+import pandas as pd
+
+
 def truncate_cell_line_names(data,index = True,separator = '_',preserve_str_location = 0):
     '''
     This is for truncating cell line names such as 'CAL120_breast' to 'CAL120'
@@ -57,7 +60,22 @@ def transform_underscore(data, underscore_to_minus = True, target = 'columns'):
     
     elif isinstance(data,list):
         print('To do')
-        
+
+def transform_invalid_char_in_df(df, which_col = None, to_char = '_'):
+    """Strip the strs, and replace the invalid chars into underscore"""
+    inv_chars = [' ','/','\\']
+    if not isinstance(df,pd.DataFrame):
+        df = pd.DataFrame(df)
+    if which_col is None:
+        which_col = df.columns
+    if isinstance(which_col,str):
+        which_col = [which_col]
+    for each_col in which_col:
+        df[each_col] = df[each_col].str.strip()
+        for each_inv in inv_chars:
+            df[each_col] = df[each_col].str.replace(each_inv,to_char)
+    return df
+
 def _check_match(A,B,print_right_here=1):
     """list like A B
     等长吗，等集合吗，等顺序吗

@@ -74,6 +74,21 @@ class Str:
         elif isinstance(data,list):
             print('To do')
 
+    def transform_invalid_char_in_df(df, which_col = None, to_char = '_'):
+        """Strip the strs, and replace the invalid chars into underscore"""
+        inv_chars = [' ','/','\\']
+        if not isinstance(df,pd.DataFrame):
+            df = pd.DataFrame(df)
+        if which_col is None:
+            which_col = df.columns
+        if isinstance(which_col,str):
+            which_col = [which_col]
+        for each_col in which_col:
+            df[each_col] = df[each_col].str.strip()
+            for each_inv in inv_chars:
+                df[each_col] = df[each_col].str.replace(each_inv,to_char)
+        return df
+
 
 #%% Stats, Math
 
@@ -163,6 +178,13 @@ def symmetrize_matrix(K, mode='average'):
         raise ValueError('Did not understand symmetrization method')
         
 #%%  Preprocessing
+def how_many_nans(obj):
+    obj = np.asarray(obj)
+    nans = np.isnan(obj)
+    how_many = np.sum(nans)
+    percent = np.sum(nans)/nans.size
+    return percent
+    
 def Impute(X,k = 5,metric = 'correlation',axis = 0,weighted = False):
     '''
     numeric knn imputation.

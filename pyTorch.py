@@ -21,6 +21,9 @@ def load_to_device(device, *arg):
             rt.append(torch.from_numpy(each_item).to(device, dtype=torch.float32))
         elif isinstance(each_item, torch.Tensor):
             rt.append(each_item.to(device, dtype=torch.float32))
+        else:
+            each_item = np.asarray(each_item)
+            rt.append(torch.from_numpy(each_item).to(device, dtype=torch.float32))
     return rt
     
 def norm_01_tensor(vector):
