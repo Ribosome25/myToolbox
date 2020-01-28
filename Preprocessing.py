@@ -99,7 +99,8 @@ def drop_too_many_nans(obj,drop_more_than = 0.9, drop_rows = True):
     nans = np.isnan(obj)
     counts = nans.sum(axis=1)
     keeps = counts[counts<drop_more_than*nans.shape[1]]
-    obj = obj.reindex(keeps.index)
+    keeps_idx = keeps.index[~keeps.index.duplicated(keep ='first')]
+    obj = obj.reindex(keeps_idx)
     
     if not drop_rows:
         obj = obj.T

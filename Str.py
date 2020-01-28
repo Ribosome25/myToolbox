@@ -10,9 +10,9 @@ def truncate_cell_line_names(data,index = True,separator = '_',preserve_str_loca
     Return the same type as input. 
     The cell line names has to be in the index or column. otw will try truc the index.
     @ Parameters:
-        index,
-        separator,
-        preserve_str_location
+        index: boolean, true for the case when CLs names in the row index, false for them in col names
+        separator: will be splited accd to this separator
+        preserve_str_location: after splition, which one is the name to keep.
     @ Returns:
         Same data type.
     '''
