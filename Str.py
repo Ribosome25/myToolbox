@@ -61,9 +61,8 @@ def transform_underscore(data, underscore_to_minus = True, target = 'columns'):
     elif isinstance(data,list):
         print('To do')
 
-def transform_invalid_char_in_df(df, which_col = None, to_char = '_'):
+def transform_invalid_char_in_df(df, which_col = None, inv_chars = [' ','/','\\'], to_char = '_'):
     """Strip the strs, and replace the invalid chars into underscore"""
-    inv_chars = [' ','/','\\']
     if not isinstance(df,pd.DataFrame):
         df = pd.DataFrame(df)
     if which_col is None:
