@@ -4,17 +4,21 @@ from scipy.spatial.distance import cdist
 
 def Impute(X,k = 5,metric = 'correlation',axis = 0,weighted = False):
     '''
-    numeric knn imputation. This does in-place.
-    (Need to check if the array ref is passed or the array value is passes. Better to use array.copy() when calling this func())
+    numeric knn imputation. Not in-place. Returns the result in the end.
+    KNNimpute uses pairwise information between the target gene with missing values
+        and the K nearest reference genes to impute the missing values. (by default, kn genes are find for one gene)
+        
     @ Input:
         np.array or pd.Dataframe
     @ Parameters:
-        k: k nearest neighbors are selected to impute the missing values
+        k: k nearest neighbors are selected to impute the missing values.
         metric: distance metric. See scipy.cdist.
         axis: 0 means finding the nearest k rows, 1 means finding the nearest k cols.
         weighted: When nearest k neighbors are picked out. Should we use the weighted avg of them. 
     @ Returns:
         DF or array after imputation.
+    
+    ref: Troyanskaya O,  Cantor M,  Sherlock G, et al. Missing value estimation methods for DNA microarrays, Bioinformatics, 2001, vol. 17 6(pg. 520-5)
     '''
 
     # If imputate col-wise: transpose it here, and transpose back in the end
@@ -86,7 +90,7 @@ def how_many_nans(obj):
     obj = np.asarray(obj)
     nans = np.isnan(obj)
     how_many = np.sum(nans)
-    percent = np.sum(nans)/nans.size
+    percent = how_many/nans.size
     return percent
 
 def drop_too_many_nans(obj,drop_more_than = 0.9, drop_rows = True):
