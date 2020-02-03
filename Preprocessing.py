@@ -111,5 +111,21 @@ def drop_too_many_nans(obj,drop_more_than = 0.9, drop_rows = True):
     
     return obj
 
+def drop_duplicated(df, axis='rows', keep='first'):
+    """
+    keep{‘first’, ‘last’, False}, default ‘first’
+    False : remv all duplicates.
+    """
+    if 'row' in axis:
+        axis=0
+    elif 'column' in axis:
+        axis=1
+    if not keep=='first':
+        return None
+    if axis==1:
+        print('tbd')
+        return None
+    
+    return df.iloc[~df.index.duplicated(keep=keep)]
     
     
