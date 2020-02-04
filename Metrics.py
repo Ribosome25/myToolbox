@@ -22,7 +22,7 @@ def NRMSE(Y_Target, Y_Predict, multi_dimension = False):
     NRMSE_Val = np.sqrt(Nom/Denom)
     return NRMSE_Val, MSE
 
-def triplet(Y_Target, Y_Predict, multi_dimension = False, output_format = list):
+def triplet(Y_Target, Y_Predict, multi_dimension = True, output_format = list):
     """
     Accepts appended results in each iterations. 
     Put multi_dimension = Ture
@@ -75,7 +75,7 @@ def test_triplet(n_dim=3):
     rst_dict = triplet(y1,y2,True,dict)
     assert(rst_dict['NRMSE'] == old_nrmse)
     return None
-    
+
 def triplet_transfer(Y_Target, Y_Predict, Y_Source, multi_dimension = False, output_format = list):
     """
     Change da thang subtrac in var to the mean(Source Mean),
