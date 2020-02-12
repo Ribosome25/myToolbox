@@ -128,4 +128,52 @@ def drop_duplicated(df, axis='rows', keep='first'):
     
     return df.iloc[~df.index.duplicated(keep=keep)]
     
+def expand_col_to_onehot(input_df,sele_cols):
+    '''
+    For some data sets, targets are given as (str, str), in one cell.
+    This func is to expand this kind of data into sparsed boolean dataframe (exsit or not)
+    paras: input dataframe whose index=instances; selected column(s) to expand.
+    returns: a dataframe, with these cols expanded to booleans. 
+    features will not having sequncials, all sele_cols are just mixed together. 
+    '''
+    if not isinstance(input_df,pd.DataFrame):
+        input_df = pd.DataFrame(input_df)
+
+    if isinstance(sele_cols,str):
+        sele_cols = [].append(sele_cols)
+
+    all_columns = set()
+    for each in input_df[sele_cols].values.flatten():
+        readed = [x.strip() for x in each.strip().split(',')]
+        all_columns = all_columns|set(readed)
+    all_columns = list(all_columns)
+    all_columns.sort()
+
+    table = pd.DataFrame(np.zeros((input_df.shape[0],len(all_columns)),dtype = bool),
+                         index = input_df.index,columns=all_columns)
+    for idx,each_row in input_df[sele_cols].iterrows():
+        for each in each_row:
+            readed = [x.strip() for x in each.strip().split(',')]
+            for each_ft in readed:
+                table.loc[idx,each_ft] = True
+    return table
+
+def expand_multiclass_to_onehot(input_df, sele_cols):
+    """
+    Some catagorical sets, classes are given as numbers or strs etc. 
+    This func is for converting multi clss to one-hot coding.
     
+    """
+    expanded_df = []
+    for each_col in sele_cols:# to be done: int cols
+        all_possible = input_df.loc[:,each_col].unique()
+        each_col_df = []
+        for each_possible in all_possible:
+            each_possible_series = (input_df.loc[:,each_col]==each_possible).astype(int,copy=False)
+            each_possible_series.name = str(each_col)+str(each_possible)
+            each_col_df.append(each_possible_series)
+        each_col_df = pd.concat(each_col_df,axis=1)
+        expanded_df.append(each_col_df)
+    expanded_df.append(input_df.drop(sele_cols, axis=1))
+    expanded_df = pd.concat(expanded_df, axis=1, join='outer', sort='False')
+    return expanded_df

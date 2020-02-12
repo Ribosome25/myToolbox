@@ -1,5 +1,8 @@
 import datetime
 import os
+
+file_cwd = os.path.dirname(__file__)
+
 def write_to_log(*arg):
     Str = ''
     for each in arg:
