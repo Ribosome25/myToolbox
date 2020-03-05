@@ -6,7 +6,7 @@ Created on Mon Apr 29 14:54:19 2019
 """
 import numpy as np
 from scipy.stats import pearsonr
-
+from scipy.stats import spearmanr
 def NRMSE(Y_Target, Y_Predict, multi_dimension = False):
     Y_Target = np.array(Y_Target); Y_Predict = np.array(Y_Predict);
     if multi_dimension:
@@ -21,12 +21,31 @@ def NRMSE(Y_Target, Y_Predict, multi_dimension = False):
     MSE = np.mean((Y_Predict - Y_Target)**2)
     NRMSE_Val = np.sqrt(Nom/Denom)
     return NRMSE_Val, MSE
-
-def triplet(Y_Target, Y_Predict, multi_dimension = True, output_format = list):
+def two_correlations(Y_Target, Y_Predict, multi_dimension = True, output_format = list):
     """
-    Accepts appended results in each iterations. 
-    Put multi_dimension = Ture
+    Returns the Spearman correlation and Pearson Correlation
     """
+    Y_Target, Y_Predict = _check_ys(Y_Target, Y_Predict, multi_dimension)
+    scorrs, pvalue = spearmanr(Y_Target, Y_Predict)    
+    pcorrs, pvalue = pearsonr(Y_Predict,Y_Target)
+    if multi_dimension:
+        scorr = scorrs
+        pcorr = pcorrs
+    else:
+        scorr = scorrs[0]
+        pcorr = pcorrs[0]
+        
+    if output_format==list:
+        return([scorr, pcorr])
+    elif output_format==dict:
+        return({'s-corr':scorr,
+                'p-corr':pcorr})
+    else:
+        print("Unknown format, to be done. return list.")
+        return([scorr,pcorr])
+    
+def _check_ys(Y_Target, Y_Predict, multi_dimension = True):
+    """Check and transform to np.array"""
     Y_Target = np.asarray(Y_Target,order = 'C',dtype=float)
     Y_Predict = np.asarray(Y_Predict,order = 'C',dtype=float)
     if multi_dimension:
@@ -35,7 +54,25 @@ def triplet(Y_Target, Y_Predict, multi_dimension = True, output_format = list):
     else:
         Y_Target = Y_Target.reshape(len(Y_Target),1)
         Y_Predict = Y_Predict.reshape(len(Y_Predict),1)
-        
+    
+    assert(len(Y_Target)==len(Y_Predict))
+    return Y_Target, Y_Predict
+    
+def triplet(Y_Target, Y_Predict, multi_dimension = True, output_format = list):
+    """
+    Accepts appended results in each iterations. 
+    Put multi_dimension = Ture
+    """
+    # Y_Target = np.asarray(Y_Target,order = 'C',dtype=float)
+    # Y_Predict = np.asarray(Y_Predict,order = 'C',dtype=float)
+    # if multi_dimension:
+    #     Y_Target = Y_Target.flatten()
+    #     Y_Predict = Y_Predict.flatten()
+    # else:
+    #     Y_Target = Y_Target.reshape(len(Y_Target),1)
+    #     Y_Predict = Y_Predict.reshape(len(Y_Predict),1)
+    Y_Target, Y_Predict = _check_ys(Y_Target, Y_Predict, multi_dimension)
+
     if len(Y_Target)==len(Y_Predict):
         mse = np.mean((Y_Predict - Y_Target)**2)
         var = np.var(Y_Target)
@@ -76,21 +113,14 @@ def test_triplet(n_dim=3):
     assert(rst_dict['NRMSE'] == old_nrmse)
     return None
 
-def triplet_transfer(Y_Target, Y_Predict, Y_Source, multi_dimension = False, output_format = list):
+def triplet_transfer(Y_Target, Y_Predict, Y_Source, multi_dimension = True, output_format = list):
     """
     Change da thang subtrac in var to the mean(Source Mean),
     Because we don't know the mean of DomainTarget. 
     Thus, if we predict all values as the mean of Sourse, NRMSE will be 1. 
     """
-    Y_Target = np.asarray(Y_Target,order = 'C')
-    Y_Predict = np.asarray(Y_Predict,order = 'C')
-    if multi_dimension:
-        Y_Target = Y_Target.flatten()
-        Y_Predict = Y_Predict.flatten()
-    else:
-        Y_Target = Y_Target.reshape(len(Y_Target),1)
-        Y_Predict = Y_Predict.reshape(len(Y_Predict),1)
-        
+    Y_Target, Y_Predict = _check_ys(Y_Target, Y_Predict, multi_dimension)
+
     if len(Y_Target)==len(Y_Predict):
         mse = np.mean((Y_Predict - Y_Target)**2)
         #TODO: confusion

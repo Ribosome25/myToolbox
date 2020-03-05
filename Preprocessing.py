@@ -65,13 +65,13 @@ def Impute(X,k = 5,metric = 'correlation',axis = 0,weighted = False):
         else:
             continue
 
+   
+    if _is_df:
+        X = pd.DataFrame(X,index = _df_idxs,columns = _df_cols)
     # if do imputation col-wise: transpose back here
     if axis == 1:
         X = X.T
-        
-    if _is_df:
-        X = pd.DataFrame(X,index = _df_idxs,columns = _df_cols)
-    
+     
     return X
 
 def _distance_matrix(X,metric):
