@@ -27,6 +27,14 @@ def grid_search_para_comb(Paras,Para_names):
     return np.vstack(temp_array)
     
 def grid_search_dict_to_df(Paras_dict):
+    """
+    For simpler usage. 
+    Example:
+    paras = {'kern': ['lin','rbf'], 'sigma':np.logspace(-1,1,10), 'B': np.linspace(1,5,5), 'lmbd' : [0,1]}
+    Params = grid_search_dict_to_df(paras)
+    for idx, each_para in Params.iterrows():
+        pass
+    """
     assert isinstance(Paras_dict, dict)
     Para_names = list(Paras_dict.keys())
     Para_table = pd.DataFrame(grid_search_para_comb(Paras_dict,Para_names),columns = Para_names)
