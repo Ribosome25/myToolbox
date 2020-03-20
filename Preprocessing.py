@@ -158,12 +158,16 @@ def expand_col_to_onehot(input_df,sele_cols):
                 table.loc[idx,each_ft] = True
     return table
 
-def expand_multiclass_to_onehot(input_df, sele_cols):
+def expand_multiclass_to_onehot(input_df, sele_cols=None):
     """
     Some catagorical sets, classes are given as numbers or strs etc. 
     This func is for converting multi clss to one-hot coding.
     
     """
+    counts = input_df.nunique(axis=0)
+    # It returns the count of unique elements along different axis.
+    if sele_cols is None:
+        sele_cols = counts[counts>2].index
     expanded_df = []
     for each_col in sele_cols:# to be done: int cols
         all_possible = input_df.loc[:,each_col].unique()
