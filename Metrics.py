@@ -7,43 +7,52 @@ Created on Mon Apr 29 14:54:19 2019
 import numpy as np
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
+
 def NRMSE(Y_Target, Y_Predict, multi_dimension = False):
     Y_Target = np.array(Y_Target); Y_Predict = np.array(Y_Predict);
     if multi_dimension:
         Y_Target = Y_Target.flatten()
         Y_Predict = Y_Predict.flatten()
     else:
-        Y_Target = Y_Target.reshape(len(Y_Target),1)
-        Y_Predict = Y_Predict.reshape(len(Y_Predict),1)
+        Y_Target = Y_Target.reshape(len(Y_Target), 1)
+        Y_Predict = Y_Predict.reshape(len(Y_Predict), 1)
     Y_Bar = np.mean(Y_Target)
     Nom = np.sum((Y_Predict - Y_Target)**2)
     Denom = np.sum((Y_Bar - Y_Target)**2)
     MSE = np.mean((Y_Predict - Y_Target)**2)
     NRMSE_Val = np.sqrt(Nom/Denom)
     return NRMSE_Val, MSE
+
 def two_correlations(Y_Target, Y_Predict, multi_dimension = True, output_format = list):
     """
     Returns the Spearman correlation and Pearson Correlation
     """
     Y_Target, Y_Predict = _check_ys(Y_Target, Y_Predict, multi_dimension)
-    scorrs, pvalue = spearmanr(Y_Target, Y_Predict)    
-    pcorrs, pvalue = pearsonr(Y_Predict,Y_Target)
+    scorrs, pvalue = spearmanr(Y_Target, Y_Predict)
+    pcorrs, pvalue = pearsonr(Y_Predict, Y_Target)
     if multi_dimension:
         scorr = scorrs
         pcorr = pcorrs
     else:
         scorr = scorrs[0]
         pcorr = pcorrs[0]
-        
-    if output_format==list:
+    if output_format == list:
         return([scorr, pcorr])
-    elif output_format==dict:
-        return({'s-corr':scorr,
-                'p-corr':pcorr})
+    elif output_format == dict:
+        return({'s-corr': scorr,
+                'p-corr': pcorr})
     else:
         print("Unknown format, to be done. return list.")
-        return([scorr,pcorr])
-    
+        return([scorr, pcorr])
+
+def avg_correlation(Y_Target, Y_Predict):
+    # Return a line of avg of correlations. This is for the DREAM project
+    cols = Y_Target.shape[1]
+    rt = np.zeros(cols)
+    for ii in range(Y_Target.shape[1]):
+        rt[ii] = two_correlations(Y_Target[:,ii], Y_Predict[:, ii])[0]
+    return rt.mean()
+        
 def _check_ys(Y_Target, Y_Predict, multi_dimension = True):
     """Check and transform to np.array"""
     Y_Target = np.asarray(Y_Target,order = 'C',dtype=float)
