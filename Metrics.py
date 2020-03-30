@@ -239,4 +239,10 @@ def kFold_NRMSE(Mdl,X,y,k = 5):
 #        return errors # tempra 
     return np.mean(errors)
 
-        
+#%%
+if __name__ == '__main__':
+    t1 = np.random.randn(10,2)
+    t2 = -t1
+    sg = avg_correlation(t1, t2)
+    test_triplet()
+    test_triplet_transfer()
