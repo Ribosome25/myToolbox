@@ -7,6 +7,17 @@ Created on Mon Apr 29 14:54:19 2019
 import numpy as np
 from scipy.stats import pearsonr
 from scipy.stats import spearmanr
+import copy
+#%%
+
+def get_performance(model, metric_func, X_train, Y_train, X_test, Y_test):
+    mdl = copy.deepcopy(model)
+    mdl.fit(X_train, Y_train)
+    pred = mdl.predict(X_test)
+    perfm = metric_func(Y_test, pred)
+    print(perfm)
+    return perfm
+#%%
 
 def NRMSE(Y_Target, Y_Predict, multi_dimension = False):
     Y_Target = np.array(Y_Target); Y_Predict = np.array(Y_Predict);
@@ -49,7 +60,9 @@ def avg_correlation(Y_Target, Y_Predict):
     # Return a line of avg of correlations. This is for the DREAM project
     cols = Y_Target.shape[1]
     rt = np.zeros(cols)
-    for ii in range(Y_Target.shape[1]):
+    Y_Target = np.asarray(Y_Target)
+    Y_Predict = np.asarray(Y_Predict)
+    for ii in range(cols):
         rt[ii] = two_correlations(Y_Target[:,ii], Y_Predict[:, ii])[0]
     return rt.mean()
         
