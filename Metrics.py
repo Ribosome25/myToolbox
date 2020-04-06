@@ -58,10 +58,15 @@ def two_correlations(Y_Target, Y_Predict, multi_dimension = True, output_format 
 
 def avg_correlation(Y_Target, Y_Predict):
     # Return a line of avg of correlations. This is for the DREAM project
-    cols = Y_Target.shape[1]
-    rt = np.zeros(cols)
     Y_Target = np.asarray(Y_Target)
     Y_Predict = np.asarray(Y_Predict)
+    if Y_Target.ndim == 1:
+        Y_Target = Y_Target.reshape(-1,1)
+    if Y_Predict.ndim == 1:
+        Y_Predict = Y_Predict.reshape(-1,1)
+    cols = Y_Target.shape[1]
+    rt = np.zeros(cols)
+
     for ii in range(cols):
         rt[ii] = two_correlations(Y_Target[:,ii], Y_Predict[:, ii])[0]
     return rt.mean()
