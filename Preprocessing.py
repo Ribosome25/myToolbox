@@ -94,16 +94,25 @@ def how_many_nans(obj):
     return percent
 
 def drop_too_many_nans(obj,drop_more_than = 0.9, drop_rows = True):
-    """Drop rows = True, otherwise drop cols."""
+    """
+    Drop the instance if its NaN exceed the ratio.
+    Ratio is more consistant than define a number thresh.
+    Drop rows = True, otherwise drop cols.
+    Only support DataFrame, if required, update for sth else later.
+    
+    """
     if drop_more_than>1:
         drop_more_than /= 100
-    assert isinstance(obj,pd.DataFrame)
+    assert isinstance(obj,pd.DataFrame),(
+        "Preprossing.drop_too_`many_nans, so far onlt pd.DF is supported.")
     if not drop_rows:
         obj = obj.T
     nans = np.isnan(obj)
     counts = nans.sum(axis=1)
     keeps = counts[counts<drop_more_than*nans.shape[1]]
     keeps_idx = keeps.index[~keeps.index.duplicated(keep ='first')]
+    print("drop NaNs: {} instances are droped.".format(
+        counts.shape[0] - keeps_idx.shape[0]))
     obj = obj.reindex(keeps_idx)
     
     if not drop_rows:
@@ -160,9 +169,10 @@ def expand_col_to_onehot(input_df,sele_cols):
 
 def expand_multiclass_to_onehot(input_df, sele_cols=None):
     """
-    Some catagorical sets, classes are given as numbers or strs etc. 
-    This func is for converting multi clss to one-hot coding.
-    
+    Common use.
+    Some catagorical sets, classes are given as numbers 1 2 3 4.. or strs. 
+    This func is for converting multi class coding to one-hot coding.
+    Set the sele_cols to None to automatic detect multiclasses.
     """
     counts = input_df.nunique(axis=0)
     # It returns the count of unique elements along different axis.
