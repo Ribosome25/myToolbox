@@ -10,7 +10,7 @@ def top_percentage_distribution(data, percentage, pick_highest = True, return_va
         data: the data set
         percentage: this is in percentage e.g. 10 for 10%
         pick_highest: Ture for picking highest data, False for picking lowest data.
-        return_values: True for returning the chosen data as well, False for returning the threshold only. 
+        return_values: True for returning the chosen data as well, False for returning the threshold only.
     '''
     data = np.asarray(data,dtype = float,order = 'C').flatten()
     total_number = len(data)
@@ -27,7 +27,12 @@ def top_percentage_distribution(data, percentage, pick_highest = True, return_va
         return threshold, values
     else:
         return threshold
-    
+
+def top_ratio_of_distribution(data, ratio, pick_highest=True, return_values=False):
+    assert ratio <= 1
+    assert ratio >= 0
+    return top_percentage_distribution(data, 100*ratio, pick_highest, return_values)
+
 def normalize_int_between(data,low = 0,high = 255):
     if isinstance(data, pd.DataFrame):
         _is_df = True
@@ -35,17 +40,17 @@ def normalize_int_between(data,low = 0,high = 255):
         _df_col = data.columns
     else:
         _is_df = False
-        
+
     data = np.asarray(data)
     if data.min() == data.max():
         raise ValueError ("Min == max. ")
     norm_data = (data-data.min()) / (data.max() - data.min())
     int_data = (norm_data * (high+1-low) + low).astype(int)
     int_data[int_data == high+1] = high
-    
+
     if _is_df:
         int_data = pd.DataFrame(int_data,index = _df_index,columns = _df_col)
-    
+
     return int_data
 
 def symmetrize_matrix(K, mode='average'):
@@ -69,7 +74,7 @@ def symmetrize_matrix(K, mode='average'):
         return 0.5*K
     else:
         raise ValueError('Did not understand symmetrization method')
-        
+
 
 def nearestPSD(A,return_real=True,epsilon=0):
     """
