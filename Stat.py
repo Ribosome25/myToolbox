@@ -34,6 +34,7 @@ def top_ratio_of_distribution(data, ratio, pick_highest=True, return_values=Fals
     return top_percentage_distribution(data, 100*ratio, pick_highest, return_values)
 
 def augment_data(data, std=0.1, multiply_by_times=3):
+    _is_df = False
     if len(data.shape)==1:
         data = data.reshape(-1,1)
     if isinstance(data, pd.DataFrame):
@@ -44,7 +45,7 @@ def augment_data(data, std=0.1, multiply_by_times=3):
         array_data = np.asarray(data)
         concats = [array_data]
         for ii in range(multiply_by_times - 1):
-            noise = std * np.random.randn(array_data.shape)
+            noise = std * np.random.randn(array_data.shape[0], array_data.shape[1])
             concats.append(array_data + noise)
     if _is_df:
         return pd.DataFrame(np.vstack(concats), index=idx * multiply_by_times, columns=cols)
