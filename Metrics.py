@@ -70,7 +70,12 @@ def avg_correlation(Y_Target, Y_Predict):
     rt = np.zeros(cols)
 
     for ii in range(cols):
-        rt[ii] = two_correlations(Y_Target[:,ii], Y_Predict[:, ii])[0]
+        tgt = Y_Target[:, ii]
+        prd = Y_Predict[:, ii]
+        nan_mask = np.isnan(tgt)
+        tgt = tgt[~nan_mask]
+        prd = prd[~nan_mask]
+        rt[ii] = two_correlations(tgt, prd)[0]
     return rt.mean()
 
 def corr_and_error(Y_Target, Y_Predict, multi_dimension=True, output_format=list):
