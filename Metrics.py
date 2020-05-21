@@ -83,19 +83,26 @@ def corr_and_error(Y_Target, Y_Predict, multi_dimension=True, output_format=list
     Returns the Spearman correlation and Pearson Correlation,
         and MSE, MAE.
     """
-    Y_Target, Y_Predict = _check_ys(Y_Target, Y_Predict, multi_dimension)
-    scorrs, pvalue = spearmanr(Y_Target, Y_Predict)
-    pcorrs, pvalue = pearsonr(Y_Predict, Y_Target)
+    # Y_Target, Y_Predict = _check_ys(Y_Target, Y_Predict, multi_dimension)
+    Y_Target = np.asarray(Y_Target)
+    Y_Predict = np.asarray(Y_Predict)
     if multi_dimension:
-        scorr = scorrs
-        pcorr = pcorrs
+        scorrs = []
+        pcorrs = []
+        mses = []
+        maes = []
+        for ii in range(Y_Target.shape[1]):
+            scorr, pcorr, mse, mae = _single_corr_and_error(Y_Target[:,ii], Y_Predict[:,ii])
+            scorrs.append(scorr)
+            pcorrs.append(pcorr)
+            mses.append(mse)
+            maes.append(mae)
+        scorr = np.mean(scorrs)
+        pcorr = np.mean(pcorrs)
+        mse = np.mean(mses)
+        mae  = np.mean(maes)
     else:
-        scorr = scorrs[0]
-        pcorr = pcorrs[0]
-
-    mse = mean_squared_error(Y_Target, Y_Predict)
-    mae = mean_absolute_error(Y_Target, Y_Predict)
-
+        scorr, pcorr, mse, mae = _single_corr_and_error(Y_Target, Y_Predict)
     if output_format == list:
         return([scorr, pcorr, mse, mae])
     elif output_format == dict:
@@ -106,6 +113,21 @@ def corr_and_error(Y_Target, Y_Predict, multi_dimension=True, output_format=list
     else:
         print("Unknown format, to be done. return list.")
         return([scorr, pcorr, mse, mae])
+
+def _single_corr_and_error(Y_Target, Y_Predict):
+    nan_maps = np.isnan(Y_Target) | np.isnan(Y_Predict)
+    Y_Target = Y_Target[~nan_maps]
+    Y_Predict = Y_Predict[~nan_maps]
+    scorrs, pvalue = spearmanr(Y_Target, Y_Predict)
+    pcorrs, pvalue = pearsonr(Y_Predict, Y_Target)
+    scorr = scorrs
+    pcorr = pcorrs
+    # scorr = scorrs[0]
+    # pcorr = pcorrs[0]
+    mse = mean_squared_error(Y_Target, Y_Predict)
+    mae = mean_absolute_error(Y_Target, Y_Predict)
+    return scorr, pcorr, mse, mae
+
 
 def _check_ys(Y_Target, Y_Predict, multi_dimension = True):
     """Check and transform to np.array"""
