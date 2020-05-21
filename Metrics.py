@@ -83,9 +83,7 @@ def corr_and_error(Y_Target, Y_Predict, multi_dimension=True, output_format=list
     Returns the Spearman correlation and Pearson Correlation,
         and MSE, MAE.
     """
-    # Y_Target, Y_Predict = _check_ys(Y_Target, Y_Predict, multi_dimension)
-    Y_Target = np.asarray(Y_Target)
-    Y_Predict = np.asarray(Y_Predict)
+    Y_Target, Y_Predict = _check_y_same_dim(Y_Target, Y_Predict, multi_dimension)
     if multi_dimension:
         scorrs = []
         pcorrs = []
@@ -128,6 +126,16 @@ def _single_corr_and_error(Y_Target, Y_Predict):
     mae = mean_absolute_error(Y_Target, Y_Predict)
     return scorr, pcorr, mse, mae
 
+def _check_y_same_dim(Y_Target, Y_Predict, multi_dimension = True):
+    """ Confused by _check_ys """
+    Y_Target = np.asarray(Y_Target, order = 'C', dtype=float)
+    Y_Predict = np.asarray(Y_Predict, order = 'C', dtype=float)
+    if multi_dimension:
+        assert len(Y_Target.shape) > 1
+    else:
+        assert len(Y_Target.shape) == 1
+    assert Y_Target.shape == Y_Predict.shape
+    return Y_Target, Y_Predict
 
 def _check_ys(Y_Target, Y_Predict, multi_dimension = True):
     """Check and transform to np.array"""
@@ -139,7 +147,6 @@ def _check_ys(Y_Target, Y_Predict, multi_dimension = True):
     else:
         Y_Target = Y_Target.reshape(len(Y_Target),1)
         Y_Predict = Y_Predict.reshape(len(Y_Predict),1)
-
     assert(len(Y_Target)==len(Y_Predict))
     return Y_Target, Y_Predict
 
