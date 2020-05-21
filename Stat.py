@@ -40,11 +40,13 @@ def augment_data(data, std=0.1, multiply_by_times=3):
         cols = data.columns.tolist()
         idx = data.index.tolist()
         _is_df = True
+    else:
+        _is_df = False
     if multiply_by_times > 0 and isinstance(multiply_by_times, int):
         array_data = np.asarray(data)
         concats = [array_data]
         for ii in range(multiply_by_times - 1):
-            noise = std * np.random.randn(array_data.shape)
+            noise = std * np.random.randn(*array_data.shape)
             concats.append(array_data + noise)
     if _is_df:
         return pd.DataFrame(np.vstack(concats), index=idx * multiply_by_times, columns=cols)
