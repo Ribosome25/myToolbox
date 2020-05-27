@@ -140,12 +140,13 @@ def drop_duplicated(df, axis='rows', keep='first'):
         False : remv all duplicates.
     """
     _is_flipped = False
-    if 'row' in axis:
-        axis = 0
-    elif 'column' in axis:
-        axis = 1
-    if not keep == 'first':
-        raise Warning('Too be done.')
+    if isinstance(axis, str):
+        if 'row' in axis:
+            axis = 0
+        elif 'column' in axis:
+            axis = 1
+    if not keep in ['first', 'last', False]:
+        raise Warning('kept method not understood. Too be done.')
         return None
     if axis == 1:
         _is_flipped = True
