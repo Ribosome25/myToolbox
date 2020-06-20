@@ -1,4 +1,5 @@
 function [sc, pc, mse, mae] = four_metrics (y_target, y_predict)
+% 多任务 多维y 的平均metrics，四种metrics 都有。
 assert(isequal(size(y_target), size(y_predict)), "Size of two arrays not equal. Check size.");
 sz = size(y_target);
 n_tasks = sz(2);
