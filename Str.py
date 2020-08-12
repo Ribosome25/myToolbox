@@ -1,13 +1,13 @@
 import pandas as pd
 
 
-def truncate_cell_line_names(data,index = True,separator = '_',preserve_str_location = 0):
+def truncate_cell_line_names(data, index=True, separator='_', preserve_str_location=0):
     '''
     This is for truncating cell line names such as 'CAL120_breast' to 'CAL120'
-    Split the input Str by separator, and preserve the No. preserve_str_location th part. 
+    Split the input Str by separator, and preserve the No. preserve_str_location th part.
     Input is DaraFrame, List, or Index. (Todo)
     If input data is in DataFrame, a option is given as: trucate the index(0) or the columns (1).
-    Return the same type as input. 
+    Return the same type as input.
     The cell line names has to be in the index or column. otw will try truc the index.
     @ Parameters:
         index: boolean, true for the case when CLs names in the row index, false for them in col names
@@ -23,19 +23,19 @@ def truncate_cell_line_names(data,index = True,separator = '_',preserve_str_loca
         else:
             data.columns = [x[preserve_str_location] for x in data.columns.str.split(separator)]
             return data
-    
+
     elif isinstance(data,pd.Index):
-        ''' Todo: check if this is passed as Ref or Copy. 
+        ''' Todo: check if this is passed as Ref or Copy.
         '''
         return [x[preserve_str_location] for x in data.str.split(separator)]
-    
+
     elif isinstance(data,list):
         return [x.split(separator)[preserve_str_location] for x in data]
-    
+
     else:
         raise TypeError
 
-def transform_underscore(data, underscore_to_minus = True, target = 'columns'):
+def transform_underscore(data, underscore_to_minus=True, target='columns'):
     """
     This is for unify the symbols, change all the - or _ in the index or columns.
     @ Parameter:
@@ -57,11 +57,11 @@ def transform_underscore(data, underscore_to_minus = True, target = 'columns'):
             else:
                 data.columns = data.columns.str.replace('-','_')
         return data
-    
+
     elif isinstance(data,list):
         print('To do')
 
-def transform_invalid_char_in_df(df, which_col = None, inv_chars = [' ','/','\\'], to_char = '_'):
+def transform_invalid_char_in_df(df, which_col=None, inv_chars=[' ','/','\\'], to_char='_'):
     """Strip the strs, and replace the invalid chars into underscore"""
     if not isinstance(df,pd.DataFrame):
         df = pd.DataFrame(df)
@@ -75,7 +75,7 @@ def transform_invalid_char_in_df(df, which_col = None, inv_chars = [' ','/','\\'
             df[each_col] = df[each_col].str.replace(each_inv,to_char)
     return df
 
-def _check_match(A,B,print_right_here=1):
+def _check_match(A, B, print_right_here=1):
     """list like A B
     等长吗，等集合吗，等顺序吗
     """
@@ -89,7 +89,7 @@ def _check_match(A,B,print_right_here=1):
         B = list(B)
         if A==B:
             rst[2]=True
-            
+
     if print_right_here:
         if rst[2]:
             print("Excat match.")
@@ -99,10 +99,10 @@ def _check_match(A,B,print_right_here=1):
             print("Duplicated elements.")
         elif not rst[1]:
             print("Different elements.")
-            
+
     return tuple(rst)
 
-def check_dataset_matched(A,B):
+def check_dataset_matched(A, B):
     """"""
     print('\n>>> Check data sets index and cols matched:')
     if isinstance(A,pd.DataFrame) and isinstance(B,pd.DataFrame):
@@ -125,5 +125,5 @@ def check_dataset_matched(A,B):
         cols = (1,1,1)
     else:
         raise TypeError("now only support pandas things.")
-        
+
     return all(idxs) and all(cols) # a py thing. all(iterable), any(iterable), logic compu of iter boolean.
