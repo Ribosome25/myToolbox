@@ -11,6 +11,7 @@ from scipy.stats import spearmanr
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 import copy
+import warnings
 # %%
 
 
@@ -134,6 +135,10 @@ def _single_corr_and_error(Y_Target, Y_Predict):
     pcorrs, pvalue = pearsonr(Y_Predict, Y_Target)
     scorr = scorrs
     pcorr = pcorrs
+    if scorr == np.nan or pcorr == np.nan:
+        warnings.warn("{}: S-corr or P-corr contains NaN. Replaced with 0.".format(__name__))
+        scorr = 0
+        pcorr = 0
     # scorr = scorrs[0]
     # pcorr = pcorrs[0]
     mse = mean_squared_error(Y_Target, Y_Predict)
