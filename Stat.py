@@ -2,6 +2,7 @@
 
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import scale, minmax_scale
 
 def top_percentage_distribution(data, percentage, pick_highest = True, return_values = False):
     '''
@@ -74,6 +75,20 @@ def normalize_int_between(data,low = 0,high = 255):
 
     return int_data
 
+def standardize_df(df):
+    assert isinstance(df, pd.DataFrame)
+    idx = df.index
+    cols = df.columns
+    values = scale(df)
+    return pd.DataFrame(values, index=idx, columns=cols)
+    
+def normalize_df(df, feature_range=(0, 1)):
+    assert isinstance(df, pd.DataFrame)
+    idx = df.index
+    cols = df.columns
+    values = minmax_scale(df, feature_range)
+    return pd.DataFrame(values, index=idx, columns=cols)
+    
 def symmetrize_matrix(K, mode='average'):
     """
     3 modes.
