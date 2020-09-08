@@ -17,10 +17,10 @@ class Str:
     def truncate_cell_line_names(data,index = True,separator = '_',preserve_str_location = 0):
         '''
         This is for truncating cell line names such as 'CAL120_breast' to 'CAL120'
-        Split the input Str by separator, and preserve the No. preserve_str_location th part. 
+        Split the input Str by separator, and preserve the No. preserve_str_location th part.
         Input is DaraFrame, List, or Index. (Todo)
         If input data is in DataFrame, a option is given as: trucate the index(0) or the columns (1).
-        Return the same type as input. 
+        Return the same type as input.
         The cell line names has to be in the index or column. otw will try truc the index.
         @ Parameters:
             index,
@@ -36,15 +36,15 @@ class Str:
             else:
                 data.columns = [x[preserve_str_location] for x in data.columns.str.split(separator)]
                 return data
-        
+
         elif isinstance(data,pd.Index):
-            ''' Todo: check if this is passed as Ref or Copy. 
+            ''' Todo: check if this is passed as Ref or Copy.
             '''
             return [x[preserve_str_location] for x in data.str.split(separator)]
-        
+
         elif isinstance(data,list):
             return [x.split(separator)[preserve_str_location] for x in data]
-        
+
         else:
             raise TypeError
 
@@ -70,7 +70,7 @@ class Str:
                 else:
                     data.columns = data.columns.str.replace('-','_')
             return data
-        
+
         elif isinstance(data,list):
             print('To do')
 
@@ -99,7 +99,7 @@ def top_percentage_distribution(data, percentage, pick_highest = True, return_va
         data: the data set
         percentage: this is in percentage e.g. 10 for 10%
         pick_highest: Ture for picking highest data, False for picking lowest data.
-        return_values: True for returning the chosen data as well, False for returning the threshold only. 
+        return_values: True for returning the chosen data as well, False for returning the threshold only.
     '''
     data = np.asarray(data,dtype = float,order = 'C').flatten()
     total_number = len(data)
@@ -116,7 +116,7 @@ def top_percentage_distribution(data, percentage, pick_highest = True, return_va
         return threshold, values
     else:
         return threshold
-    
+
 def normalize_int_between(data,low = 0,high = 255):
     if isinstance(data, pd.DataFrame):
         _is_df = True
@@ -124,17 +124,18 @@ def normalize_int_between(data,low = 0,high = 255):
         _df_col = data.columns
     else:
         _is_df = False
-        
+
     data = np.asarray(data)
-    if data.min() == data.max():
-        raise ValueError ("Min == max. ")
-    norm_data = (data-data.min()) / (data.max() - data.min())
+    dmin = np.nanmin(data)
+    dmax = np.nanmax(data)
+    if dmax == dmin:
+        raise ValueError ("Min == Max.")
+    norm_data = (data-dmin) / (dmax - dmin)
     int_data = (norm_data * (high+1-low) + low).astype(int)
     int_data[int_data == high+1] = high
-    
+
     if _is_df:
         int_data = pd.DataFrame(int_data,index = _df_index,columns = _df_col)
-    
     return int_data
 
 def nearestPSD(A,return_real=True,epsilon=0):
@@ -176,7 +177,7 @@ def symmetrize_matrix(K, mode='average'):
         return 0.5*K
     else:
         raise ValueError('Did not understand symmetrization method')
-        
+
 #%%  Preprocessing
 def how_many_nans(obj):
     obj = np.asarray(obj)
@@ -184,7 +185,7 @@ def how_many_nans(obj):
     how_many = np.sum(nans)
     percent = np.sum(nans)/nans.size
     return percent
-    
+
 def Impute(X,k = 5,metric = 'correlation',axis = 0,weighted = False):
     '''
     numeric knn imputation.
@@ -195,7 +196,7 @@ def Impute(X,k = 5,metric = 'correlation',axis = 0,weighted = False):
         k: k nearest neighbors are selected to impute the missing values
         metric: distance metric. See scipy.cdist.
         axis: 0 means finding the nearest k rows, 1 means finding the nearest k cols.
-        weighted: When nearest k neighbors are picked out. Should we use the weighted avg of them. 
+        weighted: When nearest k neighbors are picked out. Should we use the weighted avg of them.
     @ Returns:
         DF or array after imputation.
     '''
@@ -214,7 +215,7 @@ def Impute(X,k = 5,metric = 'correlation',axis = 0,weighted = False):
     # Forcing convert to numpy.array
     X = np.asarray(X,dtype = float,order = 'C')
 
-    # Get NaN map, where is NaN, and which row needs to be impu    
+    # Get NaN map, where is NaN, and which row needs to be impu
     _shape = X.shape
     NaN_map = np.isnan(X)
     sample_contains_NaN = NaN_map.sum(axis = 1)
@@ -245,19 +246,19 @@ def Impute(X,k = 5,metric = 'correlation',axis = 0,weighted = False):
     # if do imputation col-wise: transpose back here
     if axis == 1:
         X = X.T
-        
+
     if _is_df:
         X = pd.DataFrame(X,index = _df_idxs,columns = _df_cols)
-    
+
     return X
 
 def _distance_matrix(X,metric):
     # When calculating the distance, Replace NaN with col mean first.
-    
+
     #Obtain mean of columns as you need, nanmean is just convenient.
     global_mean = np.nanmean(X, axis=0)
     #Find indicies that you need to replace
-    inds = np.where(np.isnan(X)) # return tuple with 2 arrays, one-on-one matched, idx in [0], col in [1] 
+    inds = np.where(np.isnan(X)) # return tuple with 2 arrays, one-on-one matched, idx in [0], col in [1]
     #Place column means in the indices. Align the arrays using take
     X[inds] = np.take(global_mean, inds[1])
     dist_matr = cdist(X,X,metric = metric)
@@ -268,16 +269,16 @@ def grid_search_para_comb(Paras,Para_names):
     """
     Generate the parameter combinations from given parameter lists.
     i.e. from n-dim to 1-dim. Finding out all the combinations
-    
+
     Example:
     Paras = {'kern': ['lin','rbf'], 'sigma':np.logspace(-1,1,10), 'B': np.linspace(1,5,5), 'lmbd' : [0,1]}
     Para_names = list(Paras.keys())
     Para_table = pd.DataFrame(GridSearchTL.get_comb(Paras,Para_names),columns = Para_names)
     """
-    
+
     if len(Para_names) == 1:
         return np.vstack(Paras[Para_names[0]])
-    
+
     this_para = Para_names[-1]
     temp_array = []
     for each_value in Paras[this_para]:
@@ -287,7 +288,7 @@ def grid_search_para_comb(Paras,Para_names):
         return_array = np.hstack((get_array,attach_array))
         temp_array.append(return_array)
     return np.vstack(temp_array)
-    
+
 def grid_search_dict_to_df(Paras_dict):
     assert isinstance(Paras_dict, dict)
     Para_names = list(Paras_dict.keys())
@@ -300,8 +301,8 @@ def expand_col_to_onehot(input_df,sele_cols):
     this is to expand this kind of dataset into sparsed boolean dataframe (exsit or not)
     one-hot coded.
     paras: input dataframe, with index=instances, selected columns to expand.
-    returns: a dataframe, with these two cols expanded. 
-    features are not having sequnces, all sele_cols are just mixed together. 
+    returns: a dataframe, with these two cols expanded.
+    features are not having sequnces, all sele_cols are just mixed together.
     '''
     if not isinstance(input_df,pd.DataFrame):
         input_df = pd.DataFrame(input_df)
@@ -355,6 +356,6 @@ def write_csv(array,name = '_save.csv'):
     assert isinstance(name,str)
     if not name.endswith('.csv'):
         name += '.csv'
-    
+
     pd.DataFrame(array).to_csv(name)
     return True

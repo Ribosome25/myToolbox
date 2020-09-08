@@ -64,15 +64,16 @@ def normalize_int_between(data,low = 0,high = 255):
         _is_df = False
 
     data = np.asarray(data)
-    if data.min() == data.max():
-        raise ValueError ("Min == max. ")
-    norm_data = (data-data.min()) / (data.max() - data.min())
+    dmin = np.nanmin(data)
+    dmax = np.nanmax(data)
+    if dmax == dmin:
+        raise ValueError ("Min == Max.")
+    norm_data = (data-dmin) / (dmax - dmin)
     int_data = (norm_data * (high+1-low) + low).astype(int)
     int_data[int_data == high+1] = high
 
     if _is_df:
         int_data = pd.DataFrame(int_data,index = _df_index,columns = _df_col)
-
     return int_data
 
 def standardize_df(df):
