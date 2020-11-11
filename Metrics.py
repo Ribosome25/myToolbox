@@ -126,7 +126,73 @@ def corr_and_error(Y_Target, Y_Predict, multi_dimension=True, output_format=list
         print("Unknown format, to be done. return list.")
         return([scorr, pcorr, mse, mae])
 
+def sextuple(Y_Target, Y_Predict, multi_dimension=True, output_format=list):
+    """
+    Returns the Spearman correlation and Pearson Correlation, MSE, MAE.
+    Plus NRMSE, NMAE
+    """
+    Y_Target, Y_Predict = _check_y_same_dim(
+        Y_Target, Y_Predict, multi_dimension)
+    if multi_dimension:
+        scorrs = []
+        pcorrs = []
+        mses = []
+        maes = []
+        nrmses = []
+        nmaes = []
+        
+        t_mean = Y_Target.mean(axis=0)
+        t_std = Y_Target.std(axis=0)
+        
+        for ii in range(Y_Target.shape[1]):
+            scorr, pcorr, mse, mae = _single_corr_and_error(
+                Y_Target[:, ii], Y_Predict[:, ii])
+            scorrs.append(scorr)
+            pcorrs.append(pcorr)
+            mses.append(mse)
+            maes.append(mae)
+            nrmses.append(np.sqrt(mse) / t_std[ii])
+            nmaes.append(mae / t_mean[ii])
+            
+        scorr = np.mean(scorrs)
+        pcorr = np.mean(pcorrs)
+        mse = np.mean(mses)
+        mae = np.mean(maes)
+        nrmse = np.mean(nrmses)
+        nmae = np.mean(nmaes)
+    else:
+        scorr, pcorr, mse, mae = _single_corr_and_error(Y_Target, Y_Predict)
+        nrmse = np.sqrt(mse) / np.mean(Y_Target)
+        nmae = mae / np.mean(Y_Target)
+        
+    if output_format == list:
+        return([scorr, pcorr, mse, mae, nrmse, nmae])
+    elif output_format == dict:
+        return({'s-corr': scorr,
+                'p-corr': pcorr,
+                'MSE': mse,
+                'MAE': mae,
+                "NRMSE": nrmse,
+                "NMAE": nmae})
+    else:
+        print("Unknown format, to be done. return list.")
+        return([scorr, pcorr, mse, mae, nrmse, nmae])
 
+def test_sextuple():
+    x = np.random.randn(20, 5)
+    y = np.random.randn(20, 5)
+    kx = x * 10
+    ky = y * 10
+    s, p, mse, mae, nrmse, nmae = sextuple(x, y, True)
+    ks, kp, kmse, kmae, knrmse, knmae = sextuple(kx, ky, True)
+    assert(np.allclose(s, ks))
+    assert(np.allclose(p, kp))
+    assert(np.allclose(100 * mse, kmse))
+    assert(np.allclose(10 * mae, kmae))
+    assert(np.allclose(nrmse, knrmse))
+    assert(np.allclose(nmae, knmae))
+    
+    
 def _single_corr_and_error(Y_Target, Y_Predict):
     nan_maps = np.isnan(Y_Target) | np.isnan(Y_Predict)
     Y_Target = Y_Target[~nan_maps]
@@ -351,6 +417,8 @@ def kFold_NRMSE(Mdl, X, y, k=5):
 
 # %%
 if __name__ == '__main__':
+    test_sextuple()
+    raise
     t1 = np.random.randn(10, 2)
     t2 = -t1
     sg = avg_correlation(t1, t2)
