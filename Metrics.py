@@ -141,7 +141,7 @@ def sextuple(Y_Target, Y_Predict, multi_dimension=True, output_format=list):
         nrmses = []
         nmaes = []
         
-        t_mean = Y_Target.mean(axis=0)
+        t_mean = np.abs(Y_Target.mean(axis=0))
         t_std = Y_Target.std(axis=0)
         
         for ii in range(Y_Target.shape[1]):
