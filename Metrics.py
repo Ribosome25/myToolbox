@@ -140,10 +140,10 @@ def sextuple(Y_Target, Y_Predict, multi_dimension=True, output_format=list):
         maes = []
         nrmses = []
         nmaes = []
-        
+
         t_mean = np.abs(Y_Target.mean(axis=0))
         t_std = Y_Target.std(axis=0)
-        
+
         for ii in range(Y_Target.shape[1]):
             scorr, pcorr, mse, mae = _single_corr_and_error(
                 Y_Target[:, ii], Y_Predict[:, ii])
@@ -153,7 +153,7 @@ def sextuple(Y_Target, Y_Predict, multi_dimension=True, output_format=list):
             maes.append(mae)
             nrmses.append(np.sqrt(mse) / t_std[ii])
             nmaes.append(mae / t_mean[ii])
-            
+
         scorr = np.mean(scorrs)
         pcorr = np.mean(pcorrs)
         mse = np.mean(mses)
@@ -162,9 +162,9 @@ def sextuple(Y_Target, Y_Predict, multi_dimension=True, output_format=list):
         nmae = np.mean(nmaes)
     else:
         scorr, pcorr, mse, mae = _single_corr_and_error(Y_Target, Y_Predict)
-        nrmse = np.sqrt(mse) / np.mean(Y_Target)
-        nmae = mae / np.mean(Y_Target)
-        
+        nrmse = np.sqrt(mse) / np.std(Y_Target)
+        nmae = mae / np.abs(np.mean(Y_Target))
+
     if output_format == list:
         return([scorr, pcorr, mse, mae, nrmse, nmae])
     elif output_format == dict:
@@ -191,8 +191,21 @@ def test_sextuple():
     assert(np.allclose(10 * mae, kmae))
     assert(np.allclose(nrmse, knrmse))
     assert(np.allclose(nmae, knmae))
-    
-    
+
+    x = np.random.randn(20)
+    y = np.random.randn(20)
+    kx = x * 10
+    ky = y * 10
+    s, p, mse, mae, nrmse, nmae = sextuple(x, y, False)
+    ks, kp, kmse, kmae, knrmse, knmae = sextuple(kx, ky, False)
+    assert(np.allclose(s, ks))
+    assert(np.allclose(p, kp))
+    assert(np.allclose(100 * mse, kmse))
+    assert(np.allclose(10 * mae, kmae))
+    assert(np.allclose(nrmse, knrmse))
+    assert(np.allclose(nmae, knmae))
+    assert(np.allclose(nrmse, np.sqrt(mse)/x.std()))
+
 def _single_corr_and_error(Y_Target, Y_Predict):
     nan_maps = np.isnan(Y_Target) | np.isnan(Y_Predict)
     Y_Target = Y_Target[~nan_maps]
