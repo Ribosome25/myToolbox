@@ -427,11 +427,63 @@ def kFold_NRMSE(Mdl, X, y, k=5):
 #        return errors # tempra
     return np.mean(errors)
 
+#%%
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+from sklearn.metrics import auc, roc_auc_score, precision_recall_curve
+def twocat_sextuple_1d(y_true, y_pred_prob):
+    """
+    Input: Predicted probability for each class. (the raw output from model.predict_proba())
+    Accuracy, Precision, Recall, F1-score, ROC AUC, PRC AUC
+
+    Input must be 1D. Multi-target version will be done later.
+    Input must be in int. A more general interface TBD.
+    Target must be 2 categories.
+    The second cat 1 is the positive cat.
+    """
+    y_true = np.asarray_chkfinite(y_true, dtype=int)
+    y_pred_prob = np.asarray_chkfinite(y_pred_prob, dtype=float)
+    assert y_true.ndim == 1 or len(y_true) == y_true.size, "cls_1d only works for 1d targets."
+    assert len(np.unique(y_true)) == 2, "this metric function only works for 2 cat problems."
+
+    yhat = 1 * (y_pred_prob[:, 1] > 0.5)
+    acc = accuracy_score(y_true, yhat)
+    precision = precision_score(y_true, yhat)
+    recall = recall_score(y_true, yhat)
+    f1 = f1_score(y_true, yhat)
+
+    precision_list, recall_list, _ = precision_recall_curve(y_true, y_pred_prob[:, 1])
+    prc_auc = auc(recall_list, precision_list)
+    roc_auc = roc_auc_score(y_true, y_pred_prob[:, 1])
+
+    return acc, precision, recall, f1, roc_auc, prc_auc
+
+from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+def test_twocat_1d():
+    X, y = make_classification(n_samples=1000, n_classes=2, random_state=1)
+    # split into train/test sets
+    trainX, testX, trainy, testy = train_test_split(X, y, test_size=0.5, random_state=2)
+    # generate a no skill prediction (majority class)
+    ns_probs = [0 for _ in range(len(testy))]
+    # fit a model
+    model = LogisticRegression(solver='lbfgs')
+    model.fit(trainX, trainy)
+    # predict probabilities
+    lr_probs = model.predict_proba(testX)
+    result = twocat_sextuple_1d(testy, lr_probs)
+    print(result)
+    assert np.allclose(result[4], 0.903, atol=1e-3)
+    assert np.allclose(result[5], 0.898, atol=1e-3)
+    assert np.allclose(result[3], 0.841, atol=1e-3)
+
+
 
 # %%
 if __name__ == '__main__':
-    test_sextuple()
+    test_twocat_1d()
     raise
+    test_sextuple()
     t1 = np.random.randn(10, 2)
     t2 = -t1
     sg = avg_correlation(t1, t2)
