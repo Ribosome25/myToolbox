@@ -398,6 +398,34 @@ def twocat_sextuple_1d(y_true, y_pred_prob):
 
     return acc, precision, recall, f1, roc_auc, prc_auc
 
+
+def twocat_sextuple_2d(y_true, y_pred_prob):
+    """
+    Input: Predicted probability for each class. (the raw output from model.predict_proba())
+    Accuracy, Precision, Recall, F1-score, ROC AUC, PRC AUC
+
+    Input is Multi-targets. Each column stands for a target. 
+    The average value of every col is the final output. 
+
+    Target must be 2 categories.
+    The second cat 1 is the positive cat.
+    """
+    y_true = np.asarray_chkfinite(y_true, dtype=int)
+    y_pred_prob = np.asarray_chkfinite(y_pred_prob, dtype=float)
+    assert len(np.unique(y_true)) == 2, "this metric function only works for 2 cat problems."
+    if y_true.ndim == 1:
+        return twocat_sextuple_1d(y_true, y_pred_prob)
+    assert y_true.ndim == 2 and y_pred_prob.ndim == 3,\
+        "Suppose y_true is a 2d matrix, and probs is a 3D matrix. While y_true has {} dims and y_pred has {} dims".format(y_true.ndim, y_pred_prob.ndim)
+
+    results = np.empty((6, y_true.shape[1]))  # Create a array to save single result. 6 metrics, n_cols = n targets
+    for ii in range(y_true.shape[1]):
+        results[:, ii] = twocat_sextuple_1d(y_true[:, ii], y_pred_prob[ii, :, :])
+    mean = np.nanmean(results, axis=1)
+    # print(results)
+    return mean.tolist()
+
+
 from sklearn.datasets import make_classification
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
@@ -418,11 +446,43 @@ def test_twocat_1d():
     assert np.allclose(result[5], 0.898, atol=1e-3)
     assert np.allclose(result[3], 0.841, atol=1e-3)
 
+from sklearn.multioutput import MultiOutputClassifier
+from sklearn.ensemble import RandomForestClassifier as RFC
+def test_twocat_2d():
+    """
+    Test code. 500 test samples, 3 targets, 2 classes, predict prob. 
+    the output of sklearn model predict proba is a list with len of targets:
+    [ ndarray for target 1 (N x nClasses),  ndarray for target 2 (N x nClasses), ...]
+    """
+    X1, y1 = make_classification(n_samples=1000, n_classes=2, random_state=1)
+    X2, y2 = make_classification(n_samples=1000, n_classes=2, random_state=2)
+    X3, y3 = make_classification(n_samples=1000, n_classes=2, random_state=3)
+    X = np.hstack((X1, X2, X3))
+    y = np.hstack([each.reshape(-1, 1) for each in (y1, y2, y3)])
+    # split into train/test sets
+    trainX, testX, trainy, testy = train_test_split(X, y, test_size=0.5, random_state=2)
+    # generate a no skill prediction (majority class)
+    ns_probs = [0 for _ in range(len(testy))]
+    # fit a model
+    model_1 = MultiOutputClassifier(LogisticRegression(solver='lbfgs'))
+    model_1.fit(trainX, trainy)
+    # predict probabilities
+    lr_probs_1 = model_1.predict_proba(testX)  # a list of predictions cols = 2 for 2 classes.
 
+    result_1 = twocat_sextuple_2d(testy, lr_probs_1)
+    print(result_1)
+
+    # another model, comparing the format of output
+    model_2 = RFC()
+    model_2.fit(trainX, trainy)
+    lr_probs_2 = model_2.predict_proba(testX)  # a list of predictions cols = 2 for 2 classes.
+    result_2 = twocat_sextuple_2d(testy, lr_probs_2)
+    print(result_2)
 
 # %%
 if __name__ == '__main__':
-    test_twocat_1d()
+    # test_twocat_1d()
+    test_twocat_2d()
     raise
     test_sextuple()
     t1 = np.random.randn(10, 2)
