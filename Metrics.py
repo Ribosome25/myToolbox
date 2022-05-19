@@ -24,7 +24,7 @@ def get_performance(model, metric_func, X_train, Y_train, X_test, Y_test):
     print(perfm)
     return perfm
 # %%
-
+reg_metric_octuple = ["Spearman", "Pearson", "MSE", "MAE", "NRMSE", "NMAE", "RMSE", "R2"]
 
 def NRMSE(Y_Target, Y_Predict, multi_dimension=False):
     Y_Target = np.array(Y_Target)
@@ -371,6 +371,9 @@ def test_triplet_transfer(n_dim=3):
 #%%
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import auc, roc_auc_score, precision_recall_curve
+
+clf_metrics_sextuple = ["Accuracy", "Precision", "Recall", "F1-score", "ROC AUC", "PRC AUC"]
+
 def twocat_sextuple_1d(y_true, y_pred_prob):
     """
     Input: Predicted probability for each class. (the raw output from model.predict_proba())
