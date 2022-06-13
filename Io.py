@@ -83,6 +83,9 @@ def read_df(path: str, convert_index=True) -> pd.DataFrame:
         df = pd.DataFrame(dict)
     elif path.endswith(".txt"):
         df = pd.read_table(path, index_col=0)
+    elif path.endswith("xlsx"):
+        df = pd.read_excel(path, index_col=0)
+
     else:
         raise ValueError("Not supported format: " + path)
 
