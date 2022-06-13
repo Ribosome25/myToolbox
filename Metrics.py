@@ -373,13 +373,18 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 from sklearn.metrics import auc, roc_auc_score, precision_recall_curve
 def twocat_sextuple_1d(y_true, y_pred_prob):
     """
-    Input: Predicted probability for each class. (the raw output from model.predict_proba())
-    Accuracy, Precision, Recall, F1-score, ROC AUC, PRC AUC
+    Input: 
+        y_true is a 1-D array, with int 0, 1 indicating the label. 
+        y_pred_prob is predicted probability for each class. (the raw output from model.predict_proba())
+        A 2-D array. First column is the prob of being 0, 2nd is the prob of 1. 
+    Output:
+        Accuracy, Precision, Recall, F1-score, ROC AUC, PRC AUC
 
-    Input must be 1D. Multi-target version will be done later.
-    Input must be in int. A more general interface TBD.
-    Target must be 2 categories.
-    The second cat 1 is the positive cat.
+
+    Input must be one-target. y_true must be 1-D. Multi-target version will be done later.
+    Labels must be int. A more general interface to be done.
+    Target must have 2 categories.
+    The second cat 1 is the positive class.
     """
     y_true = np.asarray_chkfinite(y_true, dtype=int)
     y_pred_prob = np.asarray_chkfinite(y_pred_prob, dtype=float)
