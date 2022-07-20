@@ -156,7 +156,33 @@ def drop_duplicated(df, axis='rows', keep='first'):
         df = df.T
     return df
 
+def mean_duplicated(df, axis='rows'):
+    """
+    Remove duplicated columns or rows, replace with the mean of them.
+    """
+    # process axis
+    _is_flipped = False
+    if isinstance(axis, str):
+        if 'row' in axis:
+            axis = 0
+        elif 'column' in axis:
+            axis = 1
+    if axis == 1:
+        _is_flipped = True
+        df = df.T
+    # Mean and replace
+    dup_idx = df.index[df.index.duplicated()].unique()
+    for each in dup_idx:
+        nan_mean = np.nanmean(df.loc[each], axis=0)
+        mean = pd.Series(nan_mean, index=df.columns, name=each)
+        df.drop(each, axis=0, inplace=True)
+        df.loc[each] = mean
+    # Transpose back if needed.
+    if _is_flipped:
+        df = df.T
+    return df
 
+        
 def expand_col_to_onehot(input_df, sele_cols):
     '''
     For some data sets, targets are given as (str, str), in one cell.
