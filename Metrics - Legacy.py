@@ -1,15 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sept 23 2022
-
-Since the sklearn Metrics has been extensively updated,
-it is necessary to rewrite the regression section
-for the sake of clarity and convenience.
-
+Created on Mon Apr 29 14:54:19 2019
 
 @author: Ruibzhan
-
-
 """
 import math
 from sklearn.model_selection import KFold
@@ -22,6 +15,7 @@ import copy
 import warnings
 # %%
 
+
 def get_performance(model, metric_func, X_train, Y_train, X_test, Y_test):
     mdl = copy.deepcopy(model)
     mdl.fit(X_train, Y_train)
@@ -32,149 +26,6 @@ def get_performance(model, metric_func, X_train, Y_train, X_test, Y_test):
 # %%
 reg_metric_octuple = ["Spearman", "Pearson", "MSE", "MAE", "NRMSE", "NMAE", "RMSE", "R2"]
 
-from sklearn.utils.validation import check_consistent_length
-def _check_nan_reg_targets(y_true, y_pred, multioutput="uniform_average", dtype="numeric"):
-    """
-    Copied from sklearn.
-
-
-    """
-    check_consistent_length(y_true, y_pred)
-
-    if y_true.ndim == 1:
-        y_true = y_true.reshape((-1, 1))
-
-    if y_pred.ndim == 1:
-        y_pred = y_pred.reshape((-1, 1))
-
-    if y_true.shape[1] != y_pred.shape[1]:
-        raise ValueError(
-            "y_true and y_pred have different number of output ({0}!={1})".format(
-                y_true.shape[1], y_pred.shape[1]
-            )
-        )
-
-    n_outputs = y_true.shape[1]
-    allowed_multioutput_str = ("raw_values", "uniform_average", "variance_weighted")
-    if isinstance(multioutput, str):
-        if multioutput not in allowed_multioutput_str:
-            raise ValueError(
-                "Allowed 'multioutput' string values are {}. "
-                "You provided multioutput={!r}".format(
-                    allowed_multioutput_str, multioutput
-                )
-            )
-    elif multioutput is not None:  # Custom weights
-        if n_outputs == 1:
-            raise ValueError("Custom weights are useful only in multi-output cases.")
-        elif n_outputs != len(multioutput):
-            raise ValueError(
-                "There must be equally many custom weights (%d) as outputs (%d)."
-                % (len(multioutput), n_outputs)
-            )
-    y_type = "continuous" if n_outputs == 1 else "continuous-multioutput"
-
-    return y_type, y_true, y_pred, multioutput
-
-def nan_octuple(y_true, y_pred):
-
-    return None
-
-def octuple(y_true, y_pred):
-    y_type, y_true, y_pred, multioutput = _check_nan_reg_targets(y_true, y_pred)
-
-    if _num_samples(y_pred) < 2:
-        msg = "R^2 score is not well-defined with less than two samples."
-        warnings.warn(msg, UndefinedMetricWarning)
-        return float("nan")
-
-    return None
-
-#%% Test code
-def _single_corr_and_error(Y_Target, Y_Predict):
-    nan_maps = np.isnan(Y_Target) | np.isnan(Y_Predict)
-    Y_Target = Y_Target[~nan_maps]
-    Y_Predict = Y_Predict[~nan_maps]
-    scorrs, pvalue = spearmanr(Y_Target, Y_Predict)
-    pcorrs, pvalue = pearsonr(Y_Predict, Y_Target)
-    scorr = scorrs
-    pcorr = pcorrs
-    if scorr == np.nan or pcorr == np.nan:
-        warnings.warn("{}: S-corr or P-corr contains NaN. Replaced with 0.".format(__name__))
-        scorr = 0
-        pcorr = 0
-    # scorr = scorrs[0]
-    # pcorr = pcorrs[0]
-    mse = mean_squared_error(Y_Target, Y_Predict)
-    mae = mean_absolute_error(Y_Target, Y_Predict)
-    return scorr, pcorr, mse, mae
-
-
-def _check_y_same_dim(Y_Target, Y_Predict, multi_dimension=True):
-    """ Confused by _check_ys """
-    Y_Target = np.asarray(Y_Target, order='C', dtype=float)
-    Y_Predict = np.asarray(Y_Predict, order='C', dtype=float)
-    if multi_dimension:
-        assert len(Y_Target.shape) > 1
-    else:
-        assert len(Y_Target.shape) == 1
-    assert Y_Target.shape == Y_Predict.shape
-    return Y_Target, Y_Predict
-
-def corr_and_error(Y_Target, Y_Predict, multi_dimension=True, output_format=list):
-    """
-    Returns the Spearman correlation and Pearson Correlation,
-        and MSE, MAE.
-    """
-    Y_Target, Y_Predict = _check_y_same_dim(
-        Y_Target, Y_Predict, multi_dimension)
-    if multi_dimension:
-        scorrs = []
-        pcorrs = []
-        mses = []
-        maes = []
-        for ii in range(Y_Target.shape[1]):
-            scorr, pcorr, mse, mae = _single_corr_and_error(
-                Y_Target[:, ii], Y_Predict[:, ii])
-            scorrs.append(scorr)
-            pcorrs.append(pcorr)
-            mses.append(mse)
-            maes.append(mae)
-        scorr = np.mean(scorrs)
-        pcorr = np.mean(pcorrs)
-        mse = np.mean(mses)
-        mae = np.mean(maes)
-    else:
-        scorr, pcorr, mse, mae = _single_corr_and_error(Y_Target, Y_Predict)
-    if output_format == list:
-        return([scorr, pcorr, mse, mae])
-    elif output_format == dict:
-        return({'s-corr': scorr,
-                'p-corr': pcorr,
-                'MSE': mse,
-                'MAE': mae})
-    else:
-        print("Unknown format, to be done. return list.")
-        return([scorr, pcorr, mse, mae])
-
-def test_new_metrics():
-    import pandas as pd
-    from sklearn.metrics import r2_score
-
-    prediction = pd.read_parquet("test_data/prediction.parquet")
-    target = pd.read_parquet("test_data/y_target.parquet")
-
-    skl_r2 = r2_score(target.fillna(target.mean()), prediction,
-                      multioutput="raw_values")  # Returns a numpy array.
-    new_scores = nan_octuple(target, prediction)
-    old_corrs = corr_and_error(target, prediction)
-    assert(np.allclose(new_scores[:4], np.array(old_corrs)))
-
-if __name__ == "__main__":
-    test_new_metrics()
-
-
-#%%
 def NRMSE(Y_Target, Y_Predict, multi_dimension=False):
     Y_Target = np.array(Y_Target)
     Y_Predict = np.array(Y_Predict)
@@ -240,7 +91,41 @@ def avg_correlation(Y_Target, Y_Predict, two_corrs=False):
     return rt.mean()
 
 
-
+def corr_and_error(Y_Target, Y_Predict, multi_dimension=True, output_format=list):
+    """
+    Returns the Spearman correlation and Pearson Correlation,
+        and MSE, MAE.
+    """
+    Y_Target, Y_Predict = _check_y_same_dim(
+        Y_Target, Y_Predict, multi_dimension)
+    if multi_dimension:
+        scorrs = []
+        pcorrs = []
+        mses = []
+        maes = []
+        for ii in range(Y_Target.shape[1]):
+            scorr, pcorr, mse, mae = _single_corr_and_error(
+                Y_Target[:, ii], Y_Predict[:, ii])
+            scorrs.append(scorr)
+            pcorrs.append(pcorr)
+            mses.append(mse)
+            maes.append(mae)
+        scorr = np.mean(scorrs)
+        pcorr = np.mean(pcorrs)
+        mse = np.mean(mses)
+        mae = np.mean(maes)
+    else:
+        scorr, pcorr, mse, mae = _single_corr_and_error(Y_Target, Y_Predict)
+    if output_format == list:
+        return([scorr, pcorr, mse, mae])
+    elif output_format == dict:
+        return({'s-corr': scorr,
+                'p-corr': pcorr,
+                'MSE': mse,
+                'MAE': mae})
+    else:
+        print("Unknown format, to be done. return list.")
+        return([scorr, pcorr, mse, mae])
 
 def sextuple(Y_Target, Y_Predict, multi_dimension=True, output_format=list):
     """
@@ -330,7 +215,35 @@ def test_sextuple():
     assert(np.allclose(nmae, knmae))
     assert(np.allclose(nrmse, np.sqrt(mse)/x.std()))
 
+def _single_corr_and_error(Y_Target, Y_Predict):
+    nan_maps = np.isnan(Y_Target) | np.isnan(Y_Predict)
+    Y_Target = Y_Target[~nan_maps]
+    Y_Predict = Y_Predict[~nan_maps]
+    scorrs, pvalue = spearmanr(Y_Target, Y_Predict)
+    pcorrs, pvalue = pearsonr(Y_Predict, Y_Target)
+    scorr = scorrs
+    pcorr = pcorrs
+    if scorr == np.nan or pcorr == np.nan:
+        warnings.warn("{}: S-corr or P-corr contains NaN. Replaced with 0.".format(__name__))
+        scorr = 0
+        pcorr = 0
+    # scorr = scorrs[0]
+    # pcorr = pcorrs[0]
+    mse = mean_squared_error(Y_Target, Y_Predict)
+    mae = mean_absolute_error(Y_Target, Y_Predict)
+    return scorr, pcorr, mse, mae
 
+
+def _check_y_same_dim(Y_Target, Y_Predict, multi_dimension=True):
+    """ Confused by _check_ys """
+    Y_Target = np.asarray(Y_Target, order='C', dtype=float)
+    Y_Predict = np.asarray(Y_Predict, order='C', dtype=float)
+    if multi_dimension:
+        assert len(Y_Target.shape) > 1
+    else:
+        assert len(Y_Target.shape) == 1
+    assert Y_Target.shape == Y_Predict.shape
+    return Y_Target, Y_Predict
 
 
 def _check_ys(Y_Target, Y_Predict, multi_dimension=True):
@@ -463,10 +376,10 @@ clf_metrics_sextuple = ["Accuracy", "Precision", "Recall", "F1-score", "ROC AUC"
 
 def twocat_sextuple_1d(y_true, y_pred_prob):
     """
-    Input:
-        y_true is a 1-D array, with int 0, 1 indicating the label.
+    Input: 
+        y_true is a 1-D array, with int 0, 1 indicating the label. 
         y_pred_prob is predicted probability for each class. (the raw output from model.predict_proba())
-        A 2-D array. First column is the prob of being 0, 2nd is the prob of 1.
+        A 2-D array. First column is the prob of being 0, 2nd is the prob of 1. 
     Output:
         Accuracy, Precision, Recall, F1-score, ROC AUC, PRC AUC
 
@@ -499,8 +412,8 @@ def twocat_sextuple_2d(y_true, y_pred_prob):
     Input: Predicted probability for each class. (the raw output from model.predict_proba())
     Accuracy, Precision, Recall, F1-score, ROC AUC, PRC AUC
 
-    Input is Multi-targets. Each column stands for a target.
-    The average value of every col is the final output.
+    Input is Multi-targets. Each column stands for a target. 
+    The average value of every col is the final output. 
 
     Target must be 2 categories.
     The second cat 1 is the positive cat.
@@ -545,7 +458,7 @@ from sklearn.multioutput import MultiOutputClassifier
 from sklearn.ensemble import RandomForestClassifier as RFC
 def test_twocat_2d():
     """
-    Test code. 500 test samples, 3 targets, 2 classes, predict prob.
+    Test code. 500 test samples, 3 targets, 2 classes, predict prob. 
     the output of sklearn model predict proba is a list with len of targets:
     [ ndarray for target 1 (N x nClasses),  ndarray for target 2 (N x nClasses), ...]
     """
